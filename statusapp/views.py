@@ -15,6 +15,8 @@ class StatusView(View):
     """Api view for admin change tizer status"""
 
     def money_increase(self):
+        """User update wallet function"""
+
         username = self.request.headers.get('username')
         author = User.objects.get(username=username)
         wallet = Wallet.objects.get(pk=author.id)
@@ -24,6 +26,8 @@ class StatusView(View):
         wallet.save()
 
     def change_status(self, tizer_id, status_id):
+        """Change tizer status if admin"""
+
         error = None
 
         try:
@@ -39,18 +43,21 @@ class StatusView(View):
                         tizer.status = status
                         tizer.save()
                     else:
-                        raise Exception(f'tizer: {tizer.title} - status exists 400')
+                        raise Exception(f'tizer: {tizer.title} - status exists')
                 else:
-                    error = 'bad request 400'
+                    error = 'bad request'
         except DatabaseError:
-            error = 'database error 500'
+            error = 'database error'
         except Exception as e:
             error = str(e)
 
         return error
 
     def put(self, request, *args, **kwargs):
+        """Put function of view"""
+
         data = None
+        status_code = 200
         body = json.loads(request.body)
         username = request.headers.get('username')
         password = request.headers.get('password')
@@ -74,10 +81,12 @@ class StatusView(View):
 
                 error = self.change_status(tizer_id, status_id)
         else:
-            error = 'no access 403'
+            error = 'no access'
+            status_code = 403
 
         return JsonResponse({
             'success': not error,
             'data': data,
-            'error': error
+            'error': error,
+            'status': status_code
         })
